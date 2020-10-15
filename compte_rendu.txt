@@ -148,9 +148,18 @@ test1: on fait une chaine de taille_fenetre**2 remplie de pixels blancs: trop de
 test2: on fait un bytearray
 1- beaucoup plus rapide de faire bytearray([1,1,1]) * 800*800 que bytearray([1,1,1]*800*800)
 beaucoup plus rapide que [truc for _ in range(800*800)]
- avec un if -> plus rapide qu'avec un booléen, on arriveà 2,5s !
+ avec un if -> plus rapide qu'avec un booléen, on arriveà 2,6s !
 bytearray[:2] = list[:2]
 plus long que:
 bytearray[0] = list[0]
 bytearray[1] = list[1]
-On passe à 2.3 secondes pour generer une unique image (sans texte) de 800*800 avec 1 million de point
+On passe à 2.4 secondes pour generer une unique image (sans texte) de 800*800 avec 1 million de point
+
+_________placement de pi dans l'image_______
+utiliser un tableau 2D serait trop long, on devrait regarder chaque case.
+Au lieu de cela, on va mettre les coordonées des pixels noir dans une list, (0,0) étant en haut du chiffre.
+d'après mes mesures, un chiffre fait 22 de hauteur, 6 de large, on pourra ensuite multiplier les chiffre, mais le dessin ne peut pas être plus petit que ça
+On crait une fonction pour convertir le tabeau en coordonnées, cette fonction ne sera utilisé que par moi, pour connaitre les coordonnées, et les placer en dur. Sinon l'optimisation est inutile.
+
+Je voulais placer mes chiffres dans un fichier texte, mais on ne doit rendre que des programmes.
+Je vais donc l'écrire dans un module.
