@@ -16,8 +16,8 @@ TAILLE_CARACTERE = (6, 22)
 #_trop long pour le faire tourner à chaque fois, donc écrit en dur.
 
 def new_matrice(point='', chiffres=['']*10):
-    """n'est jamais utilisé dans le programme
-    uniquement pas moi pour faire mes listes"""
+    '''n'est jamais utilisé dans le programme
+    uniquement pas moi pour faire mes listes'''
 
     point = \
     "      "*20 +\
@@ -90,9 +90,9 @@ def new_matrice(point='', chiffres=['']*10):
     return point, chiffres
 
 def convert_to_coord(dico_chiffres):
-    """On passe dans un format plus petit et optimisé
+    '''On passe dans un format plus petit et optimisé
     on veut en sortie une liste de coordonés aux pixels noir
-    """
+    '''
     string_carac = ""
     for caractere in dico_chiffres:
         string_carac = dico_chiffres[caractere]
