@@ -1,0 +1,156 @@
+Première partie : simulation
+
+
+
+
+
+CONCEPTION:
+Après analyse, le code est assez simple mais peut-être optimisé.
+on peut enlever la racine, remplacer le if pas un booléen ne change rien d'après timeit
+
+on choisit de mettre un if car plus lisible et modifiable.
+
+def aleat():
+	return 2*random() - 1
+
+acc = 0
+for _ 1 à n:
+	x, y = aleat(), aleat()
+	if x**2+y**2 <= 1:
+		acc += 1
+
+l'élément qui coute est le random, appelé 2 fois, on n'utilise pas random.sample car beaucoup trop long. On peut faire un unique appel de random() et le couper pour aller plus vite.
+Soit on le coupe en 2, mais on perd de la précision, soit on garde x et y = x décalé d'une décimal, mais on a une dépendance entre les 2 variables.
+IMPLEMENTATION:
+on utilise random.random() qui est le plus pratique, et surtout le plus rapide (beaucoup plus que random.randint() ou random.sample())
+x = random()
+y = 10 * random() % 1
+d'après les tests, on gagne 20% mais le résultat devient légèrement faux, donc on abandonne la méthode
+méthode split:
+fonctionne mais devient plus long que de faire 2 appels
+On choisit donc la méthode ultra classique.
+Autres optimisations:
+enlever les affectations ne change pratiquement pas le temps d'excecution, mais enlever l'appel de la fonction aleat() fait gagner un temps énorme. On perd certe en maintenance, mais les consignes sont orientés vers la performence, et cette partie n'est pas négligeable puisqu'elle est dans une boucle.
+(même si le plus long va être l'affichage)
+Et comme attendu, changer import random en from random import random ne change rien.
+
+modifier l'interval à [0,1] au lieu de [-1,1] ne change pas le temps de calcul
+on garde donc l'interval [-1,1] car ça sera beaucoup plus pratique par la suite.
+
+on choisit de faire un for car plus naturel dans ce cas, et ne change pas le temps
+
+qu'est-ce qui va couter le plus ?
+simu:
+dans la grosse boucle:
+-> random
+1/tester la différence de performance entre randint et random
+
+avec timeit: pour 10 millions d'appels:
+int(999 * random.random()) + 1 prend 2,7 secondes.
+random.randint(1, 1000) prend 11 secondes.
+numpy.random.randint(1, 1000) + 1 prend 12 secondes, donc pas mieux.
+int(999 * random.uniform(0,1)) + 1 prend 4.4 secondes.
+
+Notons que l'interval dans lequel on génère le nombre ne change presque pas les résultats.
+
+Nous utiliserons donc random.random()
+
+2/faire 1 random() au carre ou 2 random() ou random.sample(range(1, 1000), 2)?
+avec timeit: pour 10 millions d'appels:
+Random.sample(range(1, 1000), 2) prend 41 secondes donc beaucoup trop long
+
+x = int(999 * random()) + 1
+y = int(999 * random()) + 1
+prend 5 secondes
+
+BEAUCOUP MIEUX:
+n = 800
+a = int(n*n * random())
+x, y = a//n + 1, a%n + 1
+prend 3.9 secondes !
+
+pour l'image de 800*800 avec 1 million de points, sur mon ordinateur (peu puissant) cela représente 0.4s au lieu de 2.2s pour deux randint. C'est toujours ça de gagné.
+
+On vérifiera que la précision reste la même, et que cela n'utilise pas plus de mémoire.
+
+3/timeit.timeit(...) pour un pseedtest
+-> on utilisera des modules python -> python dépendant mais beaucoup plus optimisé (souvent codé en C), on en utilisera moins en dehors du for
+
+4/ utiliser line_profiler, memory_profiler and objgraph (to find memory leak) and trace a graph of my code
+
+
+________test entrées_argv_________
+pour tester les entrées, j'ai repris un module fait pour mes TP BPI qui me permet de tester très simplement beaucoup de conditions.
+Il est donc assez gros, puisqu'il gère plus de types que demandé dans le projet
+
+
+
+Mettre la boucle for en dehors de la fonction permettra de faire des opérations lors de la deuxième partie, sans toucher à celle-ci
+c'est certe un peu plus lent (un appel de fonction à chaque boucle), mais négligeable (+ 0.2s pour 1 million, soit 2% du programme)
+on passe de 0.5 à 0.7 secondes pour 1 million de points pour la partie 1, mais ça ne représente même pas 2% du temps total
+De plus, on va créer un nouveau processus pour gerer le calcul, il ne sera donc pas très important
+On va même jusqu'à mettre une class point pour rentre ça plus beau et lisible (des namedtuples mais en plus rapide)
+au final, on passe de 0.5 à 1s, mais c'est beaucoup plus flexible
+
+
+
+
+
+
+_____DEUXIÈME PARTIE_______________
+
+
+
+
+
+-> affichage
+________différence entre un gros print et plusieurs petits print:______
+écrire 10 000 fois un caractère dans un fichier est 50 fois plus long qu'écrire 100 fois 100 caractères.
+il faut donc essayer d'écrire dans le fichier le moins souvent possible
+
+
+on ne veut pas être intérompu par la foncion de calcul, on va donc fork() pour avoir 2 processus en même temps (les threads marchent surement mieux mais je ne sais pas les utiliser)
+
+on utilise PPM avec bit pour chaque couleur, on n'a pas besoin de plus, cela permet de beaucoup moins écrire, on gagne aussi de l'espace.
+
+____________________________________________
+Solution structure pour stocker les points:
+-Avec une variable c'est impossible, elle devrait être beaucoup trop grosse
+-Avec une grande chaine de caractère on ne peut pas la trier.
+-Avec un tableau dynamique c'est possible, on rajoute à chaque fois un 3-uplets (coord_x, coord_y, bool_dedans) puis avec 2 tris on les mets dans l'ordre. Cette solution  est très lente (cf les tris), et on doit retrier à chaque nouvelle image. Donc mauvaise solution.
+-un tablau 2D de la taille de l'image, assez évident
+Que contient les cases ? 
+Sol 1: on remplie directement avec la chaine représentant la couleur
+Sol 2: on met 1 pour dedans, 2 pour dehors, puis on reconvertie à la sortie
+je vais tester les 2 solutions, mais la 1 m'a l'air plus rapide. (plus de mémoire mais rien de bien méchant, je mets la priorité sur la vitesse)
+
+
+_____________chiffre affichés_____________________________
+on remarque que les chiffres ont une écriture très simple, ils peuvent être stockés dans une petite matrice chacun.
+2 solutions: 1 mettre les chiffres pendant le remplissage
+2: mettre les chiffres après, en surecouche.
+on choisit la solution 2  car on gardera l'ancienne matrice pour afficher le prochain texte.
+Pour stocker les nombres, on fera une martrice, qu'on la convertira à la main en liste, ça sera plus rapide, car sur un rectangle aussi gros, peut de place sera utilisé.
+On va donc fare la liste des cooerdonnées (en liste) utilisées pour former le chiffre (ou le point)
+on aura ainsi plus qu'à appeler une fonction qui mettre du noir à ces emplecements.
+(ne pas oublier de faire list(matrice) pour ne pas copier l'adresse. Tester aussi .deepcopy())
+
+essai avec P3: sur 3 bits on est à 3.8Mo, trop lourd, on passe à du P6 pour avoir la taille demandé.
+j'ai fait une grande liste convertie avec bytes(), mais je suis passé de 2,5 à 4,5s pour 1 seule image de 1 million de points, je vais donc optimiser.
+
+bizarrement, la concatenation de list est presque instentané, de même pour la convertion. 
+on va essayer de concatener des bytes au lieu de le faire avec des listes
+beaucoup beaucoup plus long
+on va supprimer la concatenation en passant d'un tableau 2D de list à une list 3 fois plus grande
+dernière solution: mettre un entier correspond à une list (grace à un dictionnaire)
+
+test1: on fait une chaine de taille_fenetre**2 remplie de pixels blancs: trop de contraintes, et la convertion est longue
+test2: on fait un bytearray
+1- beaucoup plus rapide de faire bytearray([1,1,1]) * 800*800 que bytearray([1,1,1]*800*800)
+beaucoup plus rapide que [truc for _ in range(800*800)]
+ avec un if -> plus rapide qu'avec un booléen, on arriveà 2,5s !
+bytearray[:2] = list[:2]
+plus long que:
+bytearray[0] = list[0]
+bytearray[1] = list[1]
+On passe à 2.3 secondes pour generer une unique image (sans texte) de 800*800 avec 1 million de point
