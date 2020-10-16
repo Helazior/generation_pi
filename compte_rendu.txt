@@ -164,3 +164,8 @@ On crait une fonction pour convertir le tabeau en coordonnées, cette fonction n
 Je voulais placer mes chiffres dans un fichier texte, mais on ne doit rendre que des programmes.
 Je vais donc l'écrire dans un module.
 
+
+
+regarder la compexité avec une courbe (n le nombre de point)
+Sans génération de Gif, et sans multithread, je suis à 2.25s, et 42Mo de mémoire maximum, avec des images de 1,9Mo
+avec la création du GIF, je suis à 4,6s

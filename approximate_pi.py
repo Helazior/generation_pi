@@ -6,9 +6,11 @@ reçoit 3 arguments depuis la ligne de commande :
 -> le nombre de point n à utiliser dans la simulation ;
 -> le nombre de chiffres après la virgule à utiliser dans l'affichage de la valeur approximative de π.
 """
+import subprocess
 import simulator
+from simulator import Point
 import verif_argv
-import list_chiffres
+from list_chiffres import TAILLE_CARACTERE, DICO_LIST_COORD_CHIFFRES
 NB_IMAGES = 10
 MAX_VALUE_COLOR = 1
 IN_COLOR = [0, 0, MAX_VALUE_COLOR]#bleu
@@ -18,18 +20,20 @@ BACKGROUND_COLOR = [MAX_VALUE_COLOR, MAX_VALUE_COLOR, MAX_VALUE_COLOR] #blanc
 PROPORTION_PIXEL = 4/1000
 SPACE_DIGIT = 2#espace entre les chiffres
 
+GIF_NAME = "pi"
+
 
 def add_pi_into_img(ba_img_ppm_with_pi, str_approx_pi, taille_image, taille_pixel):
     """superpose les pi dans l'image"""
-    #TODO: changer les tuples en class point
-    start_pos = ((taille_image - len(str_approx_pi) * (list_chiffres.TAILLE_CARACTERE[0] + SPACE_DIGIT) * taille_pixel) // 2,\
-                  (taille_image - list_chiffres.TAILLE_CARACTERE[1] * taille_pixel) // 2)
+    start_pos =\
+        Point((taille_image - len(str_approx_pi) * (TAILLE_CARACTERE[0] + SPACE_DIGIT) * taille_pixel) // 2,\
+              (taille_image - TAILLE_CARACTERE[1] * taille_pixel) // 2)
     pixel_shift = [0, 0]
     for num_carac, caractere in enumerate(str_approx_pi):
         #Etape 1 : espace entre les différents chiffres
         #donc décaler le caractère selon sa position.
-        space_before = taille_pixel * num_carac * (list_chiffres.TAILLE_CARACTERE[0] + SPACE_DIGIT)
-        for coord_pix in list_chiffres.DICO_LIST_COORD_CHIFFRES[caractere]:
+        space_before = taille_pixel * num_carac * (TAILLE_CARACTERE[0] + SPACE_DIGIT)
+        for coord_pix in DICO_LIST_COORD_CHIFFRES[caractere]:
             #Etape 2 : espacer les pixels pour les grossir après
             pixel_shift[0] = (taille_pixel - 1) * coord_pix[0]
             pixel_shift[1] = (taille_pixel - 1) * coord_pix[1]
@@ -37,7 +41,7 @@ def add_pi_into_img(ba_img_ppm_with_pi, str_approx_pi, taille_image, taille_pixe
                 for j in range(taille_pixel):
                     #Etape 3 : On remplit les pixels manquant pour agrandir le caractere
                     #Etape 4 : On convertit en 1D pour l'insérer
-                    indice = 3 * (taille_image * (coord_pix[1] + pixel_shift[1] + start_pos[1] + j) + coord_pix[0] + pixel_shift[0] + start_pos[0] + space_before + i)
+                    indice = 3 * (taille_image * (coord_pix[1] + pixel_shift[1] + start_pos.y + j) + coord_pix[0] + pixel_shift[0] + start_pos.x + space_before + i)
                     ba_img_ppm_with_pi[indice] = 0
                     ba_img_ppm_with_pi[indice + 1] = 0
                     ba_img_ppm_with_pi[indice + 2] = 0
@@ -80,12 +84,15 @@ def generate_ppm_file(taille_image, nb_points, nb_chiffres_apres_virgule, taille
 
 
         write_image(bytearray_entete_ppm + ba_img_ppm_with_pi, num_image, str_approx_pi)
-    print("\n", approx_pi)
+    print("\nCréation du GIF...")
+    subprocess.run(["convert", "-delay", "60", "-loop", "0", "*.ppm", f"{GIF_NAME}.gif"])
+    print(f"{GIF_NAME}.gif généré avec succès !")
+
 
 def verif_taille_pi_dans_image(taille_image, nb_chiffres_apres_virgule, taille_pixel):
     """vérifie que l'affichage du nombre pi rentre bien dans l'image""" 
     #+2 pour l'unité et le point
-    if taille_image - (nb_chiffres_apres_virgule + 2) * (list_chiffres.TAILLE_CARACTERE[0] + SPACE_DIGIT) * taille_pixel < 0:
+    if taille_image - (nb_chiffres_apres_virgule + 2) * (TAILLE_CARACTERE[0] + SPACE_DIGIT) * taille_pixel < 0:
         print("\nErreur:")
         print("Trop de chiffres après la virgule pour cette taille d'image")
         print("Essayez avec moins de chiffres après la virgule")
