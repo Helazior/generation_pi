@@ -54,7 +54,7 @@ def convert_format(approx_pi, precision):
     return str_approx_pi.replace('.', '-')
 
 def generate_ppm_file(taille_image, nb_points, nb_chiffres_apres_virgule, taille_pixel):
-    #initialisation
+    """Coeur du programme qui va appeler les différentes fonctions pour faire les images ppm"""
     #entête ppm
     bytearray_entete_ppm = bytearray(f"P6\n{taille_image} {taille_image} {MAX_VALUE_COLOR}\n".encode())
     bytearray_image_ppm = bytearray(BACKGROUND_COLOR) * taille_image * taille_image
@@ -63,8 +63,7 @@ def generate_ppm_file(taille_image, nb_points, nb_chiffres_apres_virgule, taille
     nb_points_place = 0
     for num_image in range(NB_IMAGES):
         for nb_points_actual_image in range(1, nb_points // NB_IMAGES + (reste_points > 0) + 1):
-            point = simulator.make_random_point()
-            bool_is_in_cercle = simulator.is_in_cercle(point)
+            bool_is_in_cercle, point = simulator.generate_point()
             acc_points_in_cercle += bool_is_in_cercle
             point.convert_to_indice(taille_image)
             if bool_is_in_cercle:
@@ -86,7 +85,7 @@ def generate_ppm_file(taille_image, nb_points, nb_chiffres_apres_virgule, taille
         write_image(bytearray_entete_ppm + ba_img_ppm_with_pi, num_image, str_approx_pi)
     print("\nCréation du GIF...")
     subprocess.run(["convert", "-delay", "60", "-loop", "0", "*.ppm", f"{GIF_NAME}.gif"])
-    print(f"{GIF_NAME}.gif généré avec succès !")
+    print(f"{GIF_NAME}.gif généré avec succès")
 
 
 def verif_taille_pi_dans_image(taille_image, nb_chiffres_apres_virgule, taille_pixel):
