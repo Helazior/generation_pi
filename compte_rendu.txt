@@ -1,6 +1,8 @@
-Première partie : simulation
+On va se concentrer sur le fait d'avoir une complexité linéaire par rapport au nombre de point
+Et linéaire par rapport à la taille de l'image
 
 
+_____________________________Première partie : simulation______________________
 
 
 
@@ -165,7 +167,22 @@ Je voulais placer mes chiffres dans un fichier texte, mais on ne doit rendre que
 Je vais donc l'écrire dans un module.
 
 
+En réalité, ça prend autant de temps, mais tant pis.
+J'ai choisi cette méthode et non pas celle de faire des segments pour pouvoir faire des chiffres arrondi. Et avoir un programme qui permet plus de choses.
+
+_____________________________________________
 
 regarder la compexité avec une courbe (n le nombre de point)
 Sans génération de Gif, et sans multithread, je suis à 2.25s, et 42Mo de mémoire maximum, avec des images de 1,9Mo
 avec la création du GIF, je suis à 4,6s
+3,7s avec de l'optimisation.
+
+__________Ajout de fonctionnalités:___________
+
+On va déjà passer le nom des images gif dans un tableau, pour ne pas en avoir d'autres
+Où plutôt supprimer les ancinnes
+Le plus propre est de créer un dossier qui écrasera l'ancien
+
+faire une module "create_new_police.py" qui crait automatiquement le module list_chiffres
+Au final, on gagne un temps complètement négligeable, mais c'était fun à faire.
+
