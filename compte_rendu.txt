@@ -103,7 +103,9 @@ _____DEUXIÈME PARTIE_______________
 
 
 
-
+On fait attention à bien répartir tous les points:
+si on met 17 points, ils doivent être répartie en 2,2,2,2,2,2,2,2,1,0
+on utilise la variable "reste_points" pour cela
 
 -> affichage
 ________différence entre un gros print et plusieurs petits print:______
@@ -170,6 +172,11 @@ Je vais donc l'écrire dans un module.
 En réalité, ça prend autant de temps, mais tant pis.
 J'ai choisi cette méthode et non pas celle de faire des segments pour pouvoir faire des chiffres arrondi. Et avoir un programme qui permet plus de choses.
 
+En effet:
+je vais utiliser pygame pour pouvoir faire des polices en direct, en cliquant sur l'image.
+ainsi lorqu'on enregitre, on a le module list_chiffres qui se met à jour, et on n'a pas à toucher au programme.
+Les chaines de create_new_police seront alors supprimé car inutile.
+
 _____________________________________________
 
 regarder la compexité avec une courbe (n le nombre de point)
@@ -180,9 +187,9 @@ avec la création du GIF, je suis à 4,6s
 __________Ajout de fonctionnalités:___________
 
 On va déjà passer le nom des images gif dans un tableau, pour ne pas en avoir d'autres
-Où plutôt supprimer les ancinnes
-Le plus propre est de créer un dossier qui écrasera l'ancien
+Où plutôt supprimer les anciennes
+On met quand même les noms dans un tableau, au cas où plus tard on ne supprime plus les anciennes images (en faisant une option par exemple)
 
-faire une module "create_new_police.py" qui crait automatiquement le module list_chiffres
-Au final, on gagne un temps complètement négligeable, mais c'était fun à faire.
+On met une couleur plus clair au centre pour mieux voir le texte
+
 
