@@ -71,7 +71,7 @@ def new_matrice():
     "*    *"+\
     " **** "
 
-    chiffres[4] = \
+    chiffres[4] =\
     "   *  "*3+\
     "  *   "*4+\
     " *    "*4+\
@@ -137,7 +137,7 @@ def formate_dico(str_dico):
     ancien_indice = 0
     str_new_dico = ""
     long_ligne = 0
-    for i in enumerate(str_dico):
+    for i, _ in enumerate(str_dico):
         long_ligne += 1
         #on a une clé ou on est à plus de 90 caractere
         if (long_ligne > 7 and str_dico[i] == "'" and str_dico[i+2] == "'")\
@@ -162,29 +162,32 @@ def main():
     '''fonction main()'''
     point, chiffres = new_matrice()
     dico_chiffres = {'-' : point}
-    for num in enumerate(chiffres):
+    for num, _ in enumerate(chiffres):
         dico_chiffres[f"{num}"] = chiffres[num]
     convert_to_coord(dico_chiffres)
 
     #on récupère ce qui est avant les données:
-    with open("list_chiffres.py", 'r') as fd_chiffres:
+    with open("list_chiffres.py", 'r') as last_fd_chiffres:
+        mot_fin_entete = "TAILLE_CARACTERE ="
         entete_prog = ""
         while True:
-            ligne_entete = fd_chiffres.readline()
+            ligne_entete = last_fd_chiffres.readline()
             #on parcourt jusqu'au bout de l'entête
-            if not ligne_entete or ligne_entete[:20] == "TAILLE_CARACTERE = (":
+            if not ligne_entete or ligne_entete[:len(mot_fin_entete)] == mot_fin_entete:
                 break
             entete_prog += ligne_entete
 
     with open("list_chiffres.py", 'w') as new_fd_chiffres:
         new_fd_chiffres.write(entete_prog)
-        new_fd_chiffres.write(
-            f"TAILLE_CARACTERE = Dimension({TAILLE_CARACTERE[0]},\
-            {TAILLE_CARACTERE[1]})\n\n")
+        new_fd_chiffres.write((
+            "TAILLE_CARACTERE = "
+            f"Dimension({int(TAILLE_CARACTERE[0])}, {int(TAILLE_CARACTERE[1])})\n\n"
+            ))
         str_dico = f"DICO_LIST_COORD_CHIFFRES = {dico_chiffres}"
         #On formate str_dico pour le couper en plusieurs lignes
         str_dico = formate_dico(str_dico)
         new_fd_chiffres.write(str_dico)
+        new_fd_chiffres.write('\n') #On termine le fichier
         print("Nouvelle police prête !")
 
 

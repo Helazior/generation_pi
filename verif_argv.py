@@ -65,18 +65,32 @@ def split_argv(tab_argv):
     return Parametre(tab_type_argv, tab_name_argv, tab_min_argv, tab_max_argv)
 
 def check_inter(argument_value, min_value, max_value, tab_argv, num_arg):
-    """vérifie que le nombre est bien dans l'interval"""
+    """Vérifie que le nombre est bien dans l'interval."""
     try:
-        assert min_value <= argument_value and argument_value <= max_value
+        assert min_value <= argument_value <= max_value #!propre à python, sinon mettre un and
     except AssertionError:
-        print("Erreur : on veut: ", min_value, " ⩽ ", tab_argv.name[num_arg], " ⩽ ",\
+        print("\nErreur : on veut: ", min_value, " ⩽ ", tab_argv.name[num_arg], " ⩽ ",\
         max_value, "\net ", tab_argv.name[num_arg], " = ", argument_value, sep='')
         utilisation(tab_argv)
+
+def file_or_dir(tab_argv, tab_argv_valides, type_argv, argument):
+    """Vérifie que le dossier ou fichier existe bien."""
+    if type_argv == "file":
+        if not os.path.isfile(argument):
+            print("L'argument", argument, "doit être un fichier existant.")
+            utilisation(tab_argv)
+        tab_argv_valides.append(argument)
+    elif type_argv is dir:
+        if not os.path.isdir(argument):
+            print("L'argument", argument, "doit être un dossier existant.")
+            utilisation(tab_argv)
+        tab_argv_valides.append(argument)
+
 
 def check(tab_argv):
     """fonction principale à appeler pour vérifier les entrées
     check le nombre d'arguments, et les types et les conditions"""
-    
+
     tab_argv_valides = list()
     dic_str_to_type = {"all": all, "file": "file", "dir": dir, "int": int, "float": float,\
                      "str": str, "bool": bool, "list": list, "tuple": tuple, "dict": dict}
@@ -93,25 +107,18 @@ def check(tab_argv):
             #on verifie que le programmeur a bien demandé un type qui existe:
             type_argv = dic_str_to_type[tab_argv.type[num_arg]] #peut lèver KeyError
             argument = sys.argv[num_arg + 1]
-            if type_argv == "file":#cas particulier
-                if not os.path.isfile(argument):
-                    print("L'argument", argument, "doit être un fichier existant.")
-                    utilisation(tab_argv)
-                tab_argv_valides.append(argument)
+            #cas particulier:
+            if type_argv in ["file", dir]:
+                file_or_dir(tab_argv, tab_argv_valides, type_argv, argument)
                 continue
-            elif type_argv == dir:#cas particulier
-                if not os.path.isdir(argument):
-                    print("L'argument", argument, "doit être un dossier existant.")
-                    utilisation(tab_argv)
-                tab_argv_valides.append(argument)
-                continue
+
             #on convertit la chaine "argument" avec le type voulu,
             #cela va lever l'exception "ValueError" si ce n'est pas possible
             #Avantage: puissant et court
             #Désavantage: peut laisser passer trop de choses
             argument_value = type_argv(argument) #peut lever ValueError
 
-            if (type_argv == int or type_argv == float) and tab_argv.min[num_arg] != "":
+            if type_argv in [int, float] and tab_argv.min[num_arg] != "":
                 min_value = type_argv(tab_argv.min[num_arg])
                 max_value = type_argv(tab_argv.max[num_arg])
                 #fonction pour ne pas avoir plus de 12 branches pour faire plaisir à pylint
@@ -121,28 +128,27 @@ def check(tab_argv):
 
 
     except AssertionError:
-        print(f"Erreur : Il faut {nb_valide_arg} paramètre(s) et non {len(sys.argv) - 1}.")
+        print(f"AssertionError : Il faut {nb_valide_arg} paramètre(s) et non {len(sys.argv) - 1}.")
         utilisation(tab_argv)
 
     except ValueError:
         if tab_argv.name[num_arg]:
-            print("Erreur : l'argument numéro ", num_arg + 1, " \"", tab_argv.name[num_arg]\
+            print("\nValueError : l'argument numéro ", num_arg + 1, " \"", tab_argv.name[num_arg]\
                   , "\" doit-être un ", tab_argv.type[num_arg], sep='')
         else:
-            print("Erreur : l'argument numéro", num_arg + 1, \
+            print("\nValueError : l'argument numéro", num_arg + 1, \
                   "doit-être un", tab_argv.type[num_arg])
         utilisation(tab_argv)
 
     except KeyError:
-        print("Erreur utilisation dans le programme: type inconnu. types accepté:\
+        print("\nErreur utilisation dans le programme: type inconnu. types accepté:\
             \n'all', 'file', 'dir', 'int', 'float', 'str', 'bool', 'list', 'tuple', 'dict'")
         sys.exit(2)
 
     #except PermissionError:
     #    print("Vous n'avez pas les permissions d'écrire")
-    
+
     if len(tab_argv_valides) == 1:
         return tab_argv_valides[0]
 
     return tab_argv_valides
-

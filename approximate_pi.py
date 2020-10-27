@@ -13,6 +13,7 @@ approximative de π.
 Le programme génère 10 images .ppm (p6) puis un GIF.
 """
 import os
+import sys
 import glob #pour supprimer les anciennes images
 import subprocess
 from collections import namedtuple
@@ -39,7 +40,6 @@ VALUE_BOLD_TEXT = 13 #pour une police plus grasse (échelle * 10)
 
 GIF_NAME = "pi"
 DELAY_GIF = f"{600 / NB_IMAGES}"
-
 Coordinate = namedtuple("Coordinate", ['x', 'y'])
 
 class Image():
@@ -49,6 +49,7 @@ class Image():
     full_ba_ppm = bytearray() #bytearray contenant toute l'image
     bytearray_ppm = bytearray()
     ba_with_pi = bytearray()
+
 
     def __init__(self, image_size, nb_points):
         """prend en entrée la taille de l'image et le nombre de points"""
@@ -103,17 +104,18 @@ class Image():
         """Génère un GIF à partir des 10 selfs créées"""
         print("\nCréation du GIF...")
         subprocess.run(
-            ["convert", "-delay", DELAY_GIF, "-loop", "0"] + self.list_names + [f"{GIF_NAME}.gif"])
+            ["convert", "-delay", DELAY_GIF, "-loop", "0"] + self.list_names +\
+            [f"{GIF_NAME}.gif"], check=True)
         print(f"{GIF_NAME}.gif généré avec succès")
 
 
     def create(self, acc_points_in_cercle, remaining_points):
         """Place les points de couleur dans une self ppm (P6)"""
-        nb_points_actual_self = 0
-        for nb_points_actual_self in range(
+        nb_points_actual_image = 0
+        for nb_points_actual_image in range(
                 1, self.nb_points // self.number + (remaining_points > 0) + 1):
             point = Point()
-            bool_is_in_cercle = point.is_in_cercle(point)
+            bool_is_in_cercle = point.is_in_cercle()
             acc_points_in_cercle += bool_is_in_cercle
             point.convert_to_indice(self.size)
             pos_point_in_self = 3*(point.coord_x + self.size * point.coord_y)
@@ -127,7 +129,7 @@ class Image():
                 self.bytearray_ppm[pos_point_in_self + 2] = OUT_CERCLE_COLOR[2]
             remaining_points -= 1
 
-        return acc_points_in_cercle, nb_points_actual_self
+        return acc_points_in_cercle, nb_points_actual_image
 
 
     def verif_pi_fits_in(self, nb_chiffres_apres_virgule, pixel_size):
@@ -140,7 +142,7 @@ class Image():
             print("Trop de chiffres après la virgule pour cette taille d'self")
             print("Essayez avec moins de chiffres après la virgule")
             print("Ou prenez une self plus grande.\n")
-            exit(2)
+            sys.exit(2)
 
 
     def delete_files(self):
@@ -158,6 +160,7 @@ def convert_format(approx_pi, precision):
     """Convertit (float)approx_pi en une chaîne de bonne longueur avec un '-'."""
     str_approx_pi = f"{approx_pi:.{precision}f}"
     return str_approx_pi.replace('.', '-')
+
 
 def generate_ppm_file(image, nb_chiffres_apres_virgule, pixel_size):
     """Coeur du programme qui va appeler les différentes fonctions pour faire les images ppm"""
@@ -186,6 +189,7 @@ def generate_ppm_file(image, nb_chiffres_apres_virgule, pixel_size):
 
     image.generate_gif()
 
+
 def main():
     """Vérifie les entrées, supprime les anciennes image et lance generate_ppm_file"""
     #On vérifie que les arguments sont conformes puis on les récupère dans des variables:
@@ -205,6 +209,7 @@ def main():
     image.delete_files()
     print(" 0 %\r", end='')
     generate_ppm_file(image, nb_chiffres_apres_virgule, pixel_size)
+
 
 if __name__ == "__main__":
     main()
