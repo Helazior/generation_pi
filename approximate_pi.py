@@ -135,13 +135,14 @@ class Image():
     def verif_pi_fits_in(self, nb_chiffres_apres_virgule, pixel_size):
         """vérifie que l'affichage du nombre pi rentre bien dans l'self"""
         #+2 pour l'unité et le point
-        taille_texte = (nb_chiffres_apres_virgule + 2) * (TAILLE_CARACTERE[0] + SPACE_DIGIT) *\
-            pixel_size + pixel_size * VALUE_BOLD_TEXT // 10
+        taille_texte = ((nb_chiffres_apres_virgule + 2) * (TAILLE_CARACTERE[0] + SPACE_DIGIT) +\
+                VALUE_BOLD_TEXT // 10) * pixel_size
         if self.size - taille_texte < 0:
+            print(nb_chiffres_max)
             print("\nErreur:")
-            print("Trop de chiffres après la virgule pour cette taille d'self")
+            print("Trop de chiffres après la virgule pour cette taille d'image")
             print("Essayez avec moins de chiffres après la virgule")
-            print("Ou prenez une self plus grande.\n")
+            print("Ou prenez une image plus grande.\n")
             sys.exit(2)
 
 
